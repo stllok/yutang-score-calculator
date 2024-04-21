@@ -1,38 +1,15 @@
-# create-svelte
+# Live Stream Calculator for Yutang Cup
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+## Requirements
+- [gosumemory](https://github.com/l3lackShark/gosumemory)
 
-## Creating a project
+## Background
 
-If you're seeing this, you've probably already done this step. Congrats!
+Since the *Yutang Cup* uses special rules to calculate team scores, this tool is designed to display the scores on live streams instantly.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+As stated on the forum page, the *Yutang Cup* put your score to the opponent team's and checks the rankings to allocate scores. It's frustrating to count scores manually (especially FreeMod with the EASY mod, which is a NIGHTMARE). [Current tools](https://greasyfork.org/zh-CN/scripts/462263-osu-yutangcups7-calculator) do not cover the FreeMod multiplier. Also, they are only used on the multiplayer history page by referees.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## To-Do List
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+- [ ] Handle FreeMod EASY multiplier
+- [ ] Improve UI
