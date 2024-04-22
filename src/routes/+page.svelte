@@ -6,6 +6,8 @@
 
 	let score_left = [0, 0, 0, 0];
 	let score_right = [0, 0, 0, 0];
+	let acc_left = 0.0;
+	let acc_right = 0.0;
 
 	const TIER_LIMIT = [10, 7, 5, 3, 1];
 	const SOCKET = new WebSocket('ws://127.0.0.1:24050/ws');
@@ -36,33 +38,40 @@
 			};
 		});
 
-		raw_left = data.slice(0,4).sort((a, b) => b.score - a.score);
+		raw_left = data.slice(0, 4).sort((a, b) => b.score - a.score);
 		raw_right = data.slice(4).sort((a, b) => b.score - a.score);
 
-		raw_left.forEach((o, i) => {
-			let placement = raw_right.findIndex((t) => o.score >= t.score);
-			let score = get_score(o.tier, placement === -1 ? 4 : placement);
+		acc_left = acc_right = 0.0;
+
+		raw_left.forEach((o) => {
+			const placement = raw_right.findIndex((t) => o.score >= t.score);
+			const score = get_score(o.tier, placement === -1 ? 4 : placement);
 			score_left[o.tier] = score;
+			acc_left += o.acc;
 		});
 
-		raw_right.forEach((o, i) => {
-			let placement = raw_left.findIndex((t) => o.score >= t.score);
-			let score = get_score(o.tier, placement === -1 ? 4 : placement);
+		raw_right.forEach((o) => {
+			const placement = raw_left.findIndex((t) => o.score >= t.score);
+			const score = get_score(o.tier, placement === -1 ? 4 : placement);
 			score_right[o.tier] = score;
+			acc_right += o.acc;
 		});
 	});
 </script>
 
 <div class="flex h-screen items-center justify-between p-5">
-	<div class="flex flex-row gap-5">
+	<div class="flex flex-row items-center gap-5">
 		{#each score_left as s}
-			<p class="text-4xl text-white">{s}</p>
-			,
+			<p
+				class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
+			>
+				{s}
+			</p>
 		{/each}
 	</div>
 
 	<div class="text-3xl text-white">
-		(acc: {(raw_left.map((_) => _.acc).reduce((s, a) => s + a, 0) / 4).toFixed(2)})
+		(acc: {(acc_left / 4).toFixed(2)})
 	</div>
 
 	<div class="text-8xl text-white">
@@ -76,13 +85,16 @@
 	</div>
 
 	<div class="text-3xl text-white">
-		(acc: {(raw_right.map((_) => _.acc).reduce((s, a) => s + a, 0) / 4).toFixed(2)})
+		(acc: {(acc_right / 4).toFixed(2)})
 	</div>
 
-	<div class="flex flex-row gap-2">
+	<div class="flex flex-row-reverse items-center gap-5">
 		{#each score_right as s}
-			<p class="text-4xl text-white">{s}</p>
-			,
+			<p
+				class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
+			>
+				{s}
+			</p>
 		{/each}
 	</div>
 </div>
