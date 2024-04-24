@@ -9,6 +9,9 @@
 	let acc_left = 0.0;
 	let acc_right = 0.0;
 
+	let final_score_left = 30.5;
+	let final_score_right = 32.5;
+
 	const TIER_LIMIT = [10, 7, 5, 3, 1];
 	const SOCKET = new WebSocket('ws://127.0.0.1:24050/ws');
 
@@ -56,51 +59,109 @@
 			score_right[o.tier] = score;
 			acc_right += o.acc;
 		});
+
+		final_score_left = score_left.reduce((s, a) => s + a, 0);
+		final_score_right = score_right.reduce((s, a) => s + a, 0);
 	});
 </script>
 
-<div class="flex h-screen items-center justify-between p-5">
-	<div class="flex flex-row items-center gap-5">
-		{#each score_left as s}
-			<p
-				class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
+<div class="flex h-screen w-screen flex-col justify-between">
+	<div class="flex items-center justify-between p-5">
+		<div class="flex flex-row items-center gap-5">
+			{#each score_left as s}
+				<p
+					class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
+				>
+					{s}
+				</p>
+			{/each}
+		</div>
+
+		<div class="text-3xl text-white">
+			(acc: {(acc_left / 4).toFixed(2)})
+		</div>
+
+		<div
+			class="text-6xl text-white"
+			class:winner={final_score_left > final_score_right}
+			class:loser={final_score_right > final_score_left}
+		>
+			{final_score_left}
+		</div>
+
+		<p class="text-4xl text-white">VS</p>
+
+		<div
+			class="text-6xl text-white"
+			class:winner={final_score_right > final_score_left}
+			class:loser={final_score_left > final_score_right}
+		>
+			{final_score_right}
+		</div>
+
+		<div class="text-3xl text-white">
+			(acc: {(acc_right / 4).toFixed(2)})
+		</div>
+
+		<div class="flex flex-row-reverse items-center gap-5">
+			{#each score_right as s}
+				<p
+					class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
+				>
+					{s}
+				</p>
+			{/each}
+		</div>
+	</div>
+	<div>
+		<div class="flex justify-center">
+			<div
+				class="flex h-16 justify-end duration-150"
+				style:width="{(final_score_left / (final_score_left + final_score_right)) * 100}%"
+			/>
+			<div
+				class="mb-2 rounded-lg bg-slate-200 p-3 text-5xl duration-150"
+				class:diff-blue-win={final_score_right - final_score_left > 0}
+				class:diff-red-win={final_score_left - final_score_right > 0}
 			>
-				{s}
-			</p>
-		{/each}
-	</div>
-
-	<div class="text-3xl text-white">
-		(acc: {(acc_left / 4).toFixed(2)})
-	</div>
-
-	<div class="text-8xl text-white">
-		{score_left.reduce((s, a) => s + a, 0)}
-	</div>
-
-	<p class="text-4xl text-white">VS</p>
-
-	<div class="text-8xl text-white">
-		{score_right.reduce((s, a) => s + a, 0)}
-	</div>
-
-	<div class="text-3xl text-white">
-		(acc: {(acc_right / 4).toFixed(2)})
-	</div>
-
-	<div class="flex flex-row-reverse items-center gap-5">
-		{#each score_right as s}
-			<p
-				class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
-			>
-				{s}
-			</p>
-		{/each}
+				{Math.abs(final_score_left - final_score_right)}
+			</div>
+			<div
+				class="h-16 duration-150"
+				style:width="{(final_score_right / (final_score_left + final_score_right)) * 100}%"
+			/>
+		</div>
+		<div class="flex justify-center">
+			<div
+				class="flex h-16 justify-end bg-red-500 duration-150"
+				style:width="{(final_score_left / (final_score_left + final_score_right)) * 100}%"
+			/>
+			<div
+				class="h-16 bg-blue-500 duration-150"
+				style:width="{(final_score_right / (final_score_left + final_score_right)) * 100}%"
+			/>
+		</div>
 	</div>
 </div>
 
 <style lang="postcss">
 	:global(html) {
-		background-color: theme(colors.green.950);
+		background-color: theme(colors.green.500);
+	}
+
+	.diff-blue-win {
+		@apply bg-blue-500 text-white;
+	}
+
+	.diff-red-win {
+		@apply bg-red-500 text-white;
+	}
+
+	.winner {
+		@apply text-7xl;
+	}
+
+	.loser {
+		@apply text-5xl;
 	}
 </style>

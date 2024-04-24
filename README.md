@@ -12,4 +12,4 @@ As stated on the forum page, the *Yutang Cup* put your score to the opponent tea
 ## To-Do List
 
 - [ ] Handle FreeMod EASY multiplier
-- [ ] Improve UI
+- [x] Improve UI (maybe)
