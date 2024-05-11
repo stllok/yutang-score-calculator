@@ -2,17 +2,25 @@
 	import type { PlayerData } from './+layout';
 	import { playerData } from './player_data';
 
-	let scores = [
+	let SCORES = [
 		[0, 0, 0, 0],
 		[0, 0, 0, 0]
 	];
-	let final_score = [0, 0];
-	let accs = [0, 0];
+	let FINAL_SCORE = [0, 0];
+	let ACCS = [0, 0];
 
 	const TIER_LIMIT = [10, 7, 5, 3, 1];
 	const SOCKET = new WebSocket('ws://127.0.0.1:24050/ws');
 
-	let is_acc_mode: boolean = false;
+	let IS_ACC_MODE: boolean = false;
+
+	function handle_global_keydown(e: KeyboardEvent) {
+		switch (e.key) {
+			case 't':
+				IS_ACC_MODE = !IS_ACC_MODE;
+				break;
+		}
+	}
 
 	function score_mode(a: PlayerData, b: PlayerData): number {
 		return b.score - a.score;
@@ -32,7 +40,7 @@
 
 	function has_bonus(player: PlayerData, opponent: PlayerData | undefined): boolean {
 		if (
-			!is_acc_mode &&
+			!IS_ACC_MODE &&
 			opponent !== undefined &&
 			!player.bonus_score_flag &&
 			player.score > 2 * opponent.score
@@ -64,29 +72,31 @@
 					bonus_score_flag: false
 				};
 			})
-			.sort(is_acc_mode ? acc_mode : score_mode);
+			.sort(IS_ACC_MODE ? acc_mode : score_mode);
 
-		accs = [0, 0];
+		ACCS = [0, 0];
 		players.forEach((player) => {
 			const opponent = players.filter((_) => _.team != player.team);
 			const placement = opponent.findIndex(
-				(_) => (is_acc_mode ? acc_mode : score_mode)(player, _) < 0
+				(_) => (IS_ACC_MODE ? acc_mode : score_mode)(player, _) < 0
 			);
 			const score =
 				get_score(player.tier, placement === -1 ? 4 : placement) +
 				(has_bonus(player, opponent[placement + 1]) ? 0.5 : 0);
 
-			scores[player.team][player.tier] = score;
-			accs[player.team] += player.acc;
-			final_score[player.team] += score;
+			SCORES[player.team][player.tier] = score;
+			ACCS[player.team] += player.acc;
+			FINAL_SCORE[player.team] += score;
 		});
 	});
 </script>
 
+<svelte:window on:keydown|preventDefault={handle_global_keydown} />
+
 <div class="flex h-screen w-screen flex-col justify-between">
 	<div class="flex items-center justify-between p-5">
 		<div class="flex flex-row items-center gap-5">
-			{#each scores[0] as s}
+			{#each SCORES[0] as s}
 				<p
 					class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
 				>
@@ -96,33 +106,33 @@
 		</div>
 
 		<div class="text-3xl text-white">
-			(acc: {(accs[0] / 4).toFixed(2)})
+			(acc: {(ACCS[0] / 4).toFixed(2)})
 		</div>
 
 		<div
 			class="text-6xl text-white"
-			class:winner={final_score[0] > final_score[1]}
-			class:loser={final_score[1] > final_score[0]}
+			class:winner={FINAL_SCORE[0] > FINAL_SCORE[1]}
+			class:loser={FINAL_SCORE[1] > FINAL_SCORE[0]}
 		>
-			{final_score[0]}
+			{FINAL_SCORE[0]}
 		</div>
 
 		<p class="text-4xl text-white">VS</p>
 
 		<div
 			class="text-6xl text-white"
-			class:winner={final_score[1] > final_score[0]}
-			class:loser={final_score[0] > final_score[1]}
+			class:winner={FINAL_SCORE[1] > FINAL_SCORE[0]}
+			class:loser={FINAL_SCORE[0] > FINAL_SCORE[1]}
 		>
-			{final_score[1]}
+			{FINAL_SCORE[1]}
 		</div>
 
 		<div class="text-3xl text-white">
-			(acc: {(accs[1] / 4).toFixed(2)})
+			(acc: {(ACCS[1] / 4).toFixed(2)})
 		</div>
 
 		<div class="flex flex-row-reverse items-center gap-5">
-			{#each scores[1] as s}
+			{#each SCORES[1] as s}
 				<p
 					class="text-white first:text-5xl last:text-8xl [&:nth-child(2)]:text-6xl [&:nth-child(3)]:text-7xl"
 				>
@@ -135,28 +145,28 @@
 		<div class="flex justify-center">
 			<div
 				class="flex h-16 justify-end duration-150"
-				style:width="{(final_score[0] / (final_score[0] + final_score[1])) * 100}%"
+				style:width="{(FINAL_SCORE[0] / (FINAL_SCORE[0] + FINAL_SCORE[1])) * 100}%"
 			/>
 			<div
 				class="mb-2 rounded-lg bg-slate-200 p-3 text-5xl duration-150"
-				class:diff-blue-win={final_score[1] - final_score[0] > 0}
-				class:diff-red-win={final_score[0] - final_score[1] > 0}
+				class:diff-blue-win={FINAL_SCORE[1] - FINAL_SCORE[0] > 0}
+				class:diff-red-win={FINAL_SCORE[0] - FINAL_SCORE[1] > 0}
 			>
-				{Math.abs(final_score[0] - final_score[1])}
+				{Math.abs(FINAL_SCORE[0] - FINAL_SCORE[1])}
 			</div>
 			<div
 				class="h-16 duration-150"
-				style:width="{(final_score[1] / (final_score[0] + final_score[1])) * 100}%"
+				style:width="{(FINAL_SCORE[1] / (FINAL_SCORE[0] + FINAL_SCORE[1])) * 100}%"
 			/>
 		</div>
 		<div class="flex justify-center">
 			<div
 				class="flex h-16 justify-end bg-red-500 duration-150"
-				style:width="{(final_score[0] / (final_score[0] + final_score[1])) * 100}%"
+				style:width="{(FINAL_SCORE[0] / (FINAL_SCORE[0] + FINAL_SCORE[1])) * 100}%"
 			/>
 			<div
 				class="h-16 bg-blue-500 duration-150"
-				style:width="{(final_score[1] / (final_score[0] + final_score[1])) * 100}%"
+				style:width="{(FINAL_SCORE[1] / (FINAL_SCORE[0] + FINAL_SCORE[1])) * 100}%"
 			/>
 		</div>
 	</div>
