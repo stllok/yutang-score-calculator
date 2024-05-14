@@ -22,8 +22,8 @@
 		}
 	}
 
- 	function mod_bonus(score: number, mods: string): number {
-		return mods.match("EZ") !== null ? score * 1.75 : score;
+	function mod_bonus(score: number, mods: string): number {
+		return mods.match('EZ') !== null ? score * 1.75 : score;
 	}
 
 	function score_mode(a: PlayerData, b: PlayerData): number {
@@ -42,6 +42,7 @@
 		}
 	}
 
+	$: CALCULATION_FN = IS_ACC_MODE ? acc_mode : score_mode;
 	function has_bonus(player: PlayerData, opponent: PlayerData | undefined): boolean {
 		if (
 			!IS_ACC_MODE &&
@@ -70,21 +71,19 @@
 				return {
 					team: i < 4 ? 0 : 1,
 					id: data['spectating']['userID'],
-					score: mod_bonus(data['gameplay']['score'], data["gameplay"]["mods"]["str"]),
+					score: mod_bonus(data['gameplay']['score'], data['gameplay']['mods']['str']),
 					tier: playerData[data['spectating']['userID']].T,
 					acc: data['gameplay']['accuracy'],
 					bonus_score_flag: false
 				};
 			})
-			.sort(IS_ACC_MODE ? acc_mode : score_mode);
+			.sort(CALCULATION_FN);
 
 		ACCS = [0, 0];
 		FINAL_SCORE = [0, 0];
 		players.forEach((player) => {
 			const opponent = players.filter((_) => _.team != player.team);
-			const placement = opponent.findIndex(
-				(_) => (IS_ACC_MODE ? acc_mode : score_mode)(player, _) < 0
-			);
+			const placement = opponent.findIndex((_) => CALCULATION_FN(player, _) < 0);
 			const score =
 				get_score(player.tier, placement === -1 ? 4 : placement) +
 				(has_bonus(player, opponent[placement + 1]) ? 0.5 : 0);
@@ -93,7 +92,6 @@
 			ACCS[player.team] += player.acc;
 			FINAL_SCORE[player.team] += score;
 		});
-
 	});
 </script>
 
@@ -148,7 +146,7 @@
 		</div>
 	</div>
 	{#if IS_ACC_MODE}
-		<div class="flex justify-center mb-5">
+		<div class="mb-5 flex justify-center">
 			<p class="text-9xl">ACC MODE</p>
 		</div>
 	{/if}
@@ -184,14 +182,14 @@
 </div>
 
 <style lang="postcss">
-	.diff-blue-win {
-		@apply bg-blue-500 text-white;
+	/* .diff-blue-win {
+	@apply bg-blue-500 text-white;
 	}
 
 	.diff-red-win {
-		@apply bg-red-500 text-white;
+	@apply bg-red-500 text-white;
 	}
-
+  */
 	.winner {
 		@apply text-7xl;
 	}
