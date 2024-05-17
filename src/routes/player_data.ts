@@ -14,7 +14,12 @@ export const A = 'Team 1',
 	N = 'Team 14',
 	O = 'Team 15',
 	P = 'Team 16';
-export const playerData = {
+export const playerData: {
+	string: {
+		team: string;
+		T: number;
+	};
+} = {
 	'10056419': { team: A, T: 0 },
 	'10170668': { team: A, T: 0 },
 	'12585858': { team: A, T: 1 },

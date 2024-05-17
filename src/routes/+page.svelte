@@ -35,11 +35,9 @@
 	}
 
 	function get_score(tier: number, placement: number): number {
-		if (TIER_LIMIT[placement] > TIER_LIMIT[tier]) {
-			return TIER_LIMIT[tier] + (TIER_LIMIT[placement] - TIER_LIMIT[tier]) * 0.5;
-		} else {
-			return TIER_LIMIT[placement];
-		}
+		return TIER_LIMIT[placement] > TIER_LIMIT[tier]
+			? TIER_LIMIT[tier] + (TIER_LIMIT[placement] - TIER_LIMIT[tier]) * 0.5
+			: TIER_LIMIT[placement];
 	}
 
 	$: CALCULATION_FN = IS_ACC_MODE ? acc_mode : score_mode;
@@ -150,7 +148,8 @@
 			<p class="text-9xl">ACC MODE</p>
 		</div>
 	{/if}
-	<!-- <div>
+	<!--
+		 <div>
 		 <div class="flex justify-center">
 		 <div
 		 class="flex h-16 justify-end duration-150"
@@ -178,11 +177,13 @@
 		 style:width="{(FINAL_SCORE[1] / (FINAL_SCORE[0] + FINAL_SCORE[1])) * 100}%"
 		 />
 		 </div>
-		 </div> -->
+		 </div>
+	-->
 </div>
 
 <style lang="postcss">
-	/* .diff-blue-win {
+	/*
+	.diff-blue-win {
 	@apply bg-blue-500 text-white;
 	}
 
